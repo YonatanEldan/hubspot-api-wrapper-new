@@ -53,19 +53,19 @@ async function getEngagements(companyId, type) {
 }
 
 async function getCompanyActivityById(companyId) {
-  // const threeMonthsAgo = getDateNDaysAgo(90); // Temporarily not used
+  const threeMonthsAgo = getDateNDaysAgo(90);
   const [emails, meetings, notes] = await Promise.all([
     getEngagements(companyId, 'EMAIL'),
     getEngagements(companyId, 'MEETING'),
     getEngagements(companyId, 'NOTE'),
   ]);
-  // function filterRecent(arr) {
-  //   return arr.filter(e => new Date(e.engagement.timestamp) >= new Date(threeMonthsAgo));
-  // }
+  function filterRecent(arr) {
+    return arr.filter(e => new Date(e.engagement.timestamp) >= new Date(threeMonthsAgo));
+  }
   return {
-    emails: emails, // No date filter
-    meetings: meetings,
-    notes: notes,
+    emails: filterRecent(emails),
+    meetings: filterRecent(meetings),
+    notes: filterRecent(notes),
   };
 }
 
