@@ -46,25 +46,26 @@ async function getEngagementDetails(engagementId) {
 async function getEngagements(companyId, type) {
   const v1url = `${BASE_URL}/engagements/v1/engagements/associated/company/${companyId}/paged?limit=100`;
   const { data } = await axios.get(v1url, { headers: HEADERS });
+  data.results.forEach(e => console.log('Engagement type:', e.engagement.type));
   const filtered = data.results.filter(e => e.engagement.type === type);
   const detailed = await Promise.all(filtered.map(e => getEngagementDetails(e.engagement.id)));
   return detailed;
 }
 
 async function getCompanyActivityById(companyId) {
-  const threeMonthsAgo = getDateNDaysAgo(90);
+  // const threeMonthsAgo = getDateNDaysAgo(90); // Temporarily not used
   const [emails, meetings, notes] = await Promise.all([
     getEngagements(companyId, 'EMAIL'),
     getEngagements(companyId, 'MEETING'),
     getEngagements(companyId, 'NOTE'),
   ]);
-  function filterRecent(arr) {
-    return arr.filter(e => new Date(e.engagement.timestamp) >= new Date(threeMonthsAgo));
-  }
+  // function filterRecent(arr) {
+  //   return arr.filter(e => new Date(e.engagement.timestamp) >= new Date(threeMonthsAgo));
+  // }
   return {
-    emails: filterRecent(emails),
-    meetings: filterRecent(meetings),
-    notes: filterRecent(notes),
+    emails: emails, // No date filter
+    meetings: meetings,
+    notes: notes,
   };
 }
 
