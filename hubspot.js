@@ -60,7 +60,13 @@ async function getCompanyActivityById(companyId) {
     getEngagements(companyId, 'NOTE'),
   ]);
   function filterRecent(arr) {
-    return arr.filter(e => new Date(e.engagement.timestamp) >= new Date(threeMonthsAgo));
+    arr.forEach(e => {
+      console.log('Engagement object:', JSON.stringify(e, null, 2));
+      console.log('Timestamp:', e.engagement && e.engagement.timestamp);
+    });
+    return arr.filter(e => 
+      e.engagement.timestamp >= new Date(threeMonthsAgo).getTime()
+    );
   }
   return {
     emails: filterRecent(emails),
@@ -69,4 +75,46 @@ async function getCompanyActivityById(companyId) {
   };
 }
 
-module.exports = { getCompanyActivityById, searchCompaniesByName }; 
+async function getContactsByCompanyId(companyId) {
+  const url = `${BASE_URL}/crm/v3/objects/contacts/search`;
+  const body = {
+    filterGroups: [
+      {
+        filters: [
+          {
+            propertyName: 'associations.company',
+            operator: 'EQ',
+            value: companyId,
+          },
+        ],
+      },
+    ],
+    limit: 100,
+    properties: [], // All properties
+  };
+  const { data } = await axios.post(url, body, { headers: HEADERS });
+  return data.results;
+}
+
+async function getDealsByCompanyId(companyId) {
+  const url = `${BASE_URL}/crm/v3/objects/deals/search`;
+  const body = {
+    filterGroups: [
+      {
+        filters: [
+          {
+            propertyName: 'associations.company',
+            operator: 'EQ',
+            value: companyId,
+          },
+        ],
+      },
+    ],
+    limit: 100,
+    properties: [], // All properties
+  };
+  const { data } = await axios.post(url, body, { headers: HEADERS });
+  return data.results;
+}
+
+module.exports = { getCompanyActivityById, searchCompaniesByName, getContactsByCompanyId, getDealsByCompanyId }; 

@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { searchCompaniesByName, getCompanyActivityById } = require('./hubspot');
+const { searchCompaniesByName, getCompanyActivityById, getContactsByCompanyId, getDealsByCompanyId } = require('./hubspot');
 
 const app = express();
 app.use(cors());
@@ -32,6 +32,32 @@ app.post('/company-activity', async (req, res) => {
   try {
     const activity = await getCompanyActivityById(companyId);
     res.json(activity);
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Internal server error' });
+  }
+});
+
+app.post('/company-contacts', async (req, res) => {
+  const { companyId } = req.body;
+  if (!companyId) {
+    return res.status(400).json({ error: 'Missing companyId in request body' });
+  }
+  try {
+    const contacts = await getContactsByCompanyId(companyId);
+    res.json(contacts);
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Internal server error' });
+  }
+});
+
+app.post('/company-deals', async (req, res) => {
+  const { companyId } = req.body;
+  if (!companyId) {
+    return res.status(400).json({ error: 'Missing companyId in request body' });
+  }
+  try {
+    const deals = await getDealsByCompanyId(companyId);
+    res.json(deals);
   } catch (err) {
     res.status(500).json({ error: err.message || 'Internal server error' });
   }
